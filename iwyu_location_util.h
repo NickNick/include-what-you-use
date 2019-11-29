@@ -88,8 +88,14 @@ inline bool IsBuiltinOrCommandLineFile(const clang::FileEntry* file) {
 bool IsInScratchSpace(clang::SourceLocation loc);
 
 inline string GetFilePath(const clang::FileEntry* file) {
-  return (IsBuiltinFile(file) ? "<built-in>" :
-          NormalizeFilePath(file->getName()));
+  if (IsBuiltinFile(file)) {
+    return "<built-in>";
+  }
+  const clang::StringRef realName = file->tryGetRealPathName();
+  if (!realName.empty()) {
+    return NormalizeFilePath(realName);
+  }
+  return NormalizeFilePath(file->getName());
 }
 
 //------------------------------------------------------------
